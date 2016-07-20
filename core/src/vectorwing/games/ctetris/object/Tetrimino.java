@@ -2,6 +2,7 @@ package vectorwing.games.ctetris.object;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.StringBuilder;
 import vectorwing.games.ctetris.util.TileUtils;
 
 /**
@@ -20,7 +21,8 @@ public class Tetrimino
 	/** The shape used to determine this Tetrimino's secondary tiles. */
 	private TetriminoShape shape;
 
-	private int rotation;
+	private final TetrisGame game;
+
 	private int grid_cols;
 	private int grid_rows;
 
@@ -28,6 +30,8 @@ public class Tetrimino
 	{
 		this.grid_position = new Vector2(startX, startY);
 		this.color = color;
+		this.shape = type;
+		this.game = game;
 		this.grid_cols = game.getGridCols();
 		this.grid_rows = game.getGridRows();
 		this.secondary_tiles = new Array<Vector2>();
@@ -39,10 +43,11 @@ public class Tetrimino
 	/** Redefines the type of Tetrimino to simulate. */
 	public Tetrimino setType(TetriminoShape type)
 	{
-		this.secondary_tiles.clear();
-		secondary_tiles.add(type.tile1);
-		secondary_tiles.add(type.tile2);
-		secondary_tiles.add(type.tile3);
+		this.shape = type;
+		this.secondary_tiles = new Array<Vector2>();
+		secondary_tiles.add(shape.tile1);
+		secondary_tiles.add(shape.tile2);
+		secondary_tiles.add(shape.tile3);
 
 		return this;
 	}
@@ -50,29 +55,46 @@ public class Tetrimino
 	/** Rotates the piece clockwise, shifting all relative tiles around. */
 	public void rotate()
 	{
+		// The O piece can't spin! Go back, dummy!
+		if (this.shape == TetriminoShape.O) {
+			return;
+		}
+
+		// If the piece's rotation will end up overlapping boundaries or solids, DON'T ROTATE.
 		Vector2 compare = new Vector2();
+		Array<Array<GridTile>> grid = game.getGridState();
 		for (Vector2 tile : secondary_tiles) {
 			compare.set(tile.y, -tile.x).add(grid_position);
 			if (TileUtils.isOutOfBounds(compare, grid_cols, grid_rows)) {
 				return;
 			}
+			if (grid.get((int)compare.y).get((int)compare.x).isSolid) {
+				return;
+			}
 		}
+
+		// But if it won't, rotate it!
 		for (Vector2 tile : secondary_tiles) {
 			tile.set(tile.y, -tile.x);
 		}
 	}
 
-	/** Moves the piece by the given X and Y amounts in the grid. */
-	public void translate(int incrementX, int incrementY)
+	/** Moves the piece by the given X and Y amounts in the grid. Returns if it could translate or not. */
+	public boolean translate(int incrementX, int incrementY)
 	{
 		Array<Vector2> compare = this.getAbsoluteTilePositions();
+		Array<Array<GridTile>> grid = game.getGridState();
 		for (Vector2 tile : compare) {
 			tile.add(incrementX, incrementY);
 			if (TileUtils.isOutOfBounds(tile, grid_cols, grid_rows)) {
-				return;
+				return false;
+			}
+			if (grid.get((int)tile.y).get((int)tile.x).isSolid) {
+				return false;
 			}
 		}
 		this.grid_position.add(incrementX, incrementY);
+		return true;
 	}
 
 	/** Returns an array with all four absolute tile positions, using the current grid position. */
@@ -92,5 +114,21 @@ public class Tetrimino
 		return this.grid_position;
 	}
 
+	public void setGridPosition(int x, int y)
+	{
+		this.grid_position.set(Math.min(x, this.grid_cols - 1), Math.min(y, this.grid_rows - 1));
+	}
 
+	public TetriminoColor getColor()
+	{
+		return this.color;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder string = new StringBuilder();
+		string.append("Shape: ").append(this.shape.name()).append("\n");
+		string.append("Location: ").append(this.grid_position);
+		return string.toString();
+	}
 }

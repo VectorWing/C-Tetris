@@ -13,4 +13,6 @@ public class Settings
 	public static final int DEFAULT_GRID_COLS = 10;
 	public static final int MINIMUM_GRID_ROWS = 4;
 	public static final int MINIMUM_GRID_COLS = 4;
+
+	public static final int PIECE_MAX_SPEED = 2000;
 }
