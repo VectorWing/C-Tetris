@@ -16,4 +16,12 @@ public class TileUtils
 		}
 		return false;
 	}
+
+	/** Returns 'value' if it lies between 'min' and 'max'. Returns 'min' if too low, or 'max' if too high. */
+	public static int limit(int min, int value, int max)
+	{
+		int result = value > min ? value : min;
+		result = result < max ? result : max;
+		return result;
+	}
 }

@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.Random;
 
-/** Determines the relative coordinates of a Tetrimino's secondary tiles around the origin (0, 0). */
+/** Defines the secondary tiles for each possible Tetromino in Tetris. They are relative to a tile in the origin (0, 0). */
 public enum TetriminoShape
 {
 	I(new Vector2(-1, 0), new Vector2(1, 0), new Vector2(2, 0)),
@@ -26,7 +26,7 @@ public enum TetriminoShape
 		this.tile3 = tile3;
 	}
 
-	/** Randomly selects a Tetrimino shape and returns it. */
+	/** Returns a randomly selected Tetrimino shape. */
 	public static TetriminoShape getRandomShape()
 	{
 		Random select = new Random();

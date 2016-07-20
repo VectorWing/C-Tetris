@@ -23,32 +23,26 @@ public class Tetrimino
 
 	private final TetrisGame game;
 
-	private int grid_cols;
-	private int grid_rows;
+	//private int grid_cols;
+	//private int grid_rows;
 
 	public Tetrimino(TetriminoShape type, TetriminoColor color, TetrisGame game, int startX, int startY)
 	{
 		this.grid_position = new Vector2(startX, startY);
 		this.color = color;
-		this.shape = type;
 		this.game = game;
-		this.grid_cols = game.getGridCols();
-		this.grid_rows = game.getGridRows();
 		this.secondary_tiles = new Array<Vector2>();
-		secondary_tiles.add(type.tile1);
-		secondary_tiles.add(type.tile2);
-		secondary_tiles.add(type.tile3);
+		this.setType(type);
 	}
 
 	/** Redefines the type of Tetrimino to simulate. */
 	public Tetrimino setType(TetriminoShape type)
 	{
 		this.shape = type;
-		this.secondary_tiles = new Array<Vector2>();
+		this.secondary_tiles.clear();
 		secondary_tiles.add(shape.tile1);
 		secondary_tiles.add(shape.tile2);
 		secondary_tiles.add(shape.tile3);
-
 		return this;
 	}
 
@@ -65,7 +59,7 @@ public class Tetrimino
 		Array<Array<GridTile>> grid = game.getGridState();
 		for (Vector2 tile : secondary_tiles) {
 			compare.set(tile.y, -tile.x).add(grid_position);
-			if (TileUtils.isOutOfBounds(compare, grid_cols, grid_rows)) {
+			if (TileUtils.isOutOfBounds(compare, game.getGridCols(), game.getGridRows())) {
 				return;
 			}
 			if (grid.get((int)compare.y).get((int)compare.x).isSolid) {
@@ -86,7 +80,7 @@ public class Tetrimino
 		Array<Array<GridTile>> grid = game.getGridState();
 		for (Vector2 tile : compare) {
 			tile.add(incrementX, incrementY);
-			if (TileUtils.isOutOfBounds(tile, grid_cols, grid_rows)) {
+			if (TileUtils.isOutOfBounds(tile, game.getGridCols(), game.getGridRows())) {
 				return false;
 			}
 			if (grid.get((int)tile.y).get((int)tile.x).isSolid) {
@@ -108,15 +102,12 @@ public class Tetrimino
 		return result;
 	}
 
-	/** Returns the origin's current absolute position in the tile grid. */
-	public Vector2 getGridPosition()
+	public Tetrimino setGridPosition(int x, int y)
 	{
-		return this.grid_position;
-	}
-
-	public void setGridPosition(int x, int y)
-	{
-		this.grid_position.set(Math.min(x, this.grid_cols - 1), Math.min(y, this.grid_rows - 1));
+		this.grid_position.set(
+				TileUtils.limit(0, x, game.getGridCols() - 1),
+				TileUtils.limit(0, y, game.getGridRows() - 1));
+		return this;
 	}
 
 	public TetriminoColor getColor()

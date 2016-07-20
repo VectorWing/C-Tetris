@@ -20,10 +20,13 @@ public class TetrisGame
 	private int grid_cols;
 	private int grid_rows;
 
+	// Data //
 	private Array<Array<GridTile>> grid;
 	private Tetrimino current_piece;
 	private TetriminoShape next_piece;
+	private int score;
 
+	// Logic //
 	private State state;
 	private int piece_speed;
 	private float piece_cascade_time;
@@ -51,11 +54,10 @@ public class TetrisGame
 	/** Initiates a brand new round of Tetris, with an empty grid. */
 	public void begin()
 	{
-		updateTetriminoTypes();
+		updateCurrentNextPiece();
 		piece_cascade_time = 100;
 		piece_speed = 200;
 		state = State.PLAYING;
-		System.out.println(current_piece.toString());
 	}
 
 	public void update(float delta)
@@ -73,7 +75,7 @@ public class TetrisGame
 		}
 	}
 
-	private void updateTetriminoTypes()
+	private void updateCurrentNextPiece()
 	{
 		if (next_piece != null) {
 			current_piece.setType(next_piece);
@@ -87,7 +89,6 @@ public class TetrisGame
 	{
 		if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
 			current_piece.rotate();
-			System.out.println(current_piece.toString());
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
 			piece_just_spawned = false;
@@ -107,13 +108,13 @@ public class TetrisGame
 		piece_cascade_time -= piece_speed * delta;
 		if (piece_cascade_time <= 0) {
 			if (!current_piece.translate(0, -1)) {
-				placeDownPiece();
+				placePiece();
 			}
 			piece_cascade_time = 100;
 		}
 	}
 
-	public void placeDownPiece()
+	public void placePiece()
 	{
 		Array<Vector2> current_tiles = current_piece.getAbsoluteTilePositions();
 		for (Vector2 tile : current_tiles) {
@@ -123,7 +124,7 @@ public class TetrisGame
 		current_piece.setGridPosition(5, 16);
 
 		checkFullLines();
-		updateTetriminoTypes();
+		updateCurrentNextPiece();
 		piece_just_spawned = true;
 	}
 
